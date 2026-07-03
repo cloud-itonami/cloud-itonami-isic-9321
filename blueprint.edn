@@ -1,0 +1,11 @@
+{:itonami.blueprint/id "cloud-itonami-9321"
+ :itonami.blueprint/name "Activities of amusement parks and theme parks"
+ :itonami.blueprint/isic-rev5 "9321"
+ :itonami.blueprint/domain :recreation/amusement-parks
+ :itonami.blueprint/license "AGPL-3.0-or-later"
+ :itonami.blueprint/social-impact [:cultural-access :data-sovereignty :transparency]
+ :itonami.blueprint/governor :ride-safety-governor
+ :itonami.blueprint/required-technologies [:robotics :identity :forms :dmn :bpmn :audit-ledger]
+ :itonami.blueprint/optional-technologies []
+ :itonami.blueprint/status :public-oss
+ :itonami.blueprint/robotics true}
