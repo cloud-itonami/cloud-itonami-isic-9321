@@ -1,6 +1,6 @@
 # Governance
 
-`cloud-itonami-9321` is an OSS open-business blueprint for activities of amusement parks and theme parks -- ride operation and park attraction management.
+`cloud-itonami-isic-9321` is an OSS open-business blueprint for activities of amusement parks and theme parks -- ride operation and park attraction management.
 Governance covers both the capability layer and the operator model.
 
 ## Maintainers

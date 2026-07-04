@@ -2,7 +2,7 @@
 
 ## Classification
 
-- Repository: `cloud-itonami-9321`
+- Repository: `cloud-itonami-isic-9321`
 - ISIC Rev.5: `9321`
 - Activity: activities of amusement parks and theme parks -- ride operation and park attraction management
 - Social impact: cultural/recreational access, data sovereignty, transparent audit

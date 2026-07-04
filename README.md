@@ -1,4 +1,4 @@
-# cloud-itonami-9321
+# cloud-itonami-isic-9321
 
 Open Business Blueprint for **ISIC Rev.5 9321**: Activities of amusement parks and theme parks.
 
