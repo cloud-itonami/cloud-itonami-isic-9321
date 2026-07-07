@@ -31,6 +31,12 @@
 ## Trust Controls
 
 - no ride reopens after a safety hold without human sign-off (a licensed ride operator/inspector)
-- a fabricated inspection record forces a hold, not an override
-- every reopening path is auditable
+- a fabricated jurisdiction citation, incomplete reopening evidence, a
+  failed post-hold inspection, or a ride understaffed relative to its
+  own minimum operator requirement -- each forces a hold, not an
+  override
+- a ride cannot be reopened twice: a double-reopening attempt is held
+  off this actor's own ride facts alone, with no upstream comparison
+  needed
+- every intake, assessment, screening and reopening path is auditable
 - emergency manual override paths remain outside LLM control
