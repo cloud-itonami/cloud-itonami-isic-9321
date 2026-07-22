@@ -31,10 +31,9 @@
   over an immutable log -- the audit trail a patron trusting a park
   needs, and the evidence an operator needs if a reopening is later
   disputed."
-  (:require #?(:clj  [clojure.edn :as edn]
-               :cljs [cljs.reader :as edn])
-            [parksafety.registry :as registry]
-            [langchain.db :as d]))
+  (:require [parksafety.registry :as registry]
+            [langchain.db :as d]
+            [langchain-store.core :as ls]))
 
 (defprotocol Store
   (ride [s id])
@@ -143,9 +142,6 @@
    :reopening/seq                   {:db/unique :db.unique/identity}
    :sequence/jurisdiction             {:db/unique :db.unique/identity}})
 
-(defn- enc [v] (pr-str v))
-(defn- dec* [s] (when s (edn/read-string s)))
-
 (defn- ride->tx [{:keys [id ride-name hold-reason post-hold-inspection-passed? certified-operators-on-duty
                         minimum-operators-required reopened? jurisdiction status reopening-number]}]
   (cond-> {:ride/id id}
@@ -183,21 +179,15 @@
          (map #(pull->ride (d/pull (d/db conn) ride-pull [:ride/id %])))
          (sort-by :id)))
   (inspection-of [_ id]
-    (dec* (d/q '[:find ?p . :in $ ?rid
-                :where [?k :inspection/ride-id ?rid] [?k :inspection/payload ?p]]
-              (d/db conn) id)))
+    (ls/dec* (d/q '[:find ?p . :in $ ?rid
+                   :where [?k :inspection/ride-id ?rid] [?k :inspection/payload ?p]]
+                 (d/db conn) id)))
   (assessment-of [_ ride-id]
-    (dec* (d/q '[:find ?p . :in $ ?rid
-                :where [?a :assessment/ride-id ?rid] [?a :assessment/payload ?p]]
-              (d/db conn) ride-id)))
-  (ledger [_]
-    (->> (d/q '[:find ?s ?f :where [?e :ledger/seq ?s] [?e :ledger/fact ?f]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
-  (reopening-history [_]
-    (->> (d/q '[:find ?s ?r :where [?e :reopening/seq ?s] [?e :reopening/record ?r]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
+    (ls/dec* (d/q '[:find ?p . :in $ ?rid
+                   :where [?a :assessment/ride-id ?rid] [?a :assessment/payload ?p]]
+                 (d/db conn) ride-id)))
+  (ledger [_] (ls/read-stream conn :ledger/seq :ledger/fact))
+  (reopening-history [_] (ls/read-stream conn :reopening/seq :reopening/record))
   (next-sequence [_ jurisdiction]
     (or (d/q '[:find ?n . :in $ ?j
               :where [?e :sequence/jurisdiction ?j] [?e :sequence/next ?n]]
@@ -211,10 +201,10 @@
       (d/transact! conn [(ride->tx value)])
 
       :assessment/set
-      (d/transact! conn [{:assessment/ride-id (first path) :assessment/payload (enc payload)}])
+      (d/transact! conn [{:assessment/ride-id (first path) :assessment/payload (ls/enc payload)}])
 
       :inspection/set
-      (d/transact! conn [{:inspection/ride-id (first path) :inspection/payload (enc payload)}])
+      (d/transact! conn [{:inspection/ride-id (first path) :inspection/payload (ls/enc payload)}])
 
       :ride/mark-reopened
       (let [ride-id (first path)
@@ -224,12 +214,12 @@
         (d/transact! conn
                      [(ride->tx (assoc ride-patch :id ride-id))
                       {:sequence/jurisdiction jurisdiction :sequence/next next-n}
-                      {:reopening/seq (count (reopening-history s)) :reopening/record (enc (get result "record"))}])
+                      {:reopening/seq (count (reopening-history s)) :reopening/record (ls/enc (get result "record"))}])
         result)
       nil)
     s)
   (append-ledger! [s fact]
-    (d/transact! conn [{:ledger/seq (count (ledger s)) :ledger/fact (enc fact)}])
+    (ls/append-blob! conn :ledger/seq :ledger/fact (count (ledger s)) fact)
     fact)
   (with-rides [s rides]
     (when (seq rides) (d/transact! conn (mapv ride->tx (vals rides)))) s))
