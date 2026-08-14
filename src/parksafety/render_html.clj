@@ -81,10 +81,17 @@
         ;; that thread's complete audit; keeping only the last avoids
         ;; double-counting a resumed thread.
         audits (atom [])
+        ;; NOTE `g/run*` returns {:state :events :status :frontier} -- the
+        ;; :audit channel is under :state, NOT at the top level. Reading
+        ;; it from the top level yields nil, which would make every
+        ;; approver render as "auto-committed (no approver)": a silent
+        ;; measurement failure that is indistinguishable from a real
+        ;; finding. `-main` asserts a non-empty grant set to keep that
+        ;; from ever passing quietly again.
         remember! (fn [tid result]
                     (swap! audits (fn [v]
                                     (conj (vec (remove #(= tid (first %)) v))
-                                          [tid (vec (:audit result))])))
+                                          [tid (vec (:audit (:state result)))])))
                     result)
         exec! (fn [tid request]
                 (remember! tid (g/run* actor {:request request :context operator}
@@ -137,8 +144,6 @@
 
 (defn- basis->s [basis]
   (str/join ", " (map kw->s basis)))
-
-(defn- yes-no [b] (if b "yes" "no"))
 
 (defn- tag [class text]
   (format "<span class=\"%s\">%s</span>" class text))
@@ -538,7 +543,8 @@
         {:keys [db audit]} (run-demo!)
         ledger (store/ledger db)
         holds (filter #(= :governor-hold (:t %)) ledger)
-        rules (distinct (mapcat #(map :rule (:violations %)) holds))]
+        rules (distinct (mapcat #(map :rule (:violations %)) holds))
+        grants (filter #(= :approval-granted (:t %)) audit)]
     ;; Build-time invariant, not a convention: a console that shows this
     ;; actor never being stopped would misrepresent it as ungated. If the
     ;; scenario stops producing HARD holds, fail the build rather than
@@ -551,10 +557,24 @@
                       {:ledger-facts (count ledger)
                        :governor-holds 0
                        :committed (count (filter #(= :committed (:t %)) ledger))})))
+    ;; Evidence floor for the approver disclosure. This scenario approves
+    ;; five operations by hand, so an EMPTY grant set never means "nobody
+    ;; approved" -- it means the audit channel was not read correctly (it
+    ;; lives under `:state`, and reading the top level silently yields
+    ;; nil). Without this floor that failure renders as a plausible-looking
+    ;; "auto-committed (no approver)" on every row.
+    (when (zero? (count grants))
+      (throw (ex-info (str "render-html: collected 0 :approval-granted audit facts, but this "
+                           "scenario approves operations by hand. The audit channel was not "
+                           "read correctly; refusing to publish an approver column that cannot "
+                           "distinguish 'nobody approved' from 'not measured'.")
+                      {:audit-facts (count audit)
+                       :approval-granted 0})))
     (spit out (render db audit))
     (println "wrote" out
              (str "(" (count ledger) " ledger facts, "
                   (count holds) " HARD governor holds across "
                   (count rules) " distinct rules "
                   (pr-str (vec (sort-by name rules))) ", "
+                  (count grants) " human approvals, "
                   (count (store/reopening-history db)) " ride reopenings)"))))
