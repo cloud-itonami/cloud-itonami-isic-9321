@@ -5,7 +5,15 @@
  ;; (forkable outside the workspace); the :local/root paths only resolve
  ;; inside the monorepo checkout — a standalone fork should override them
  ;; with git coordinates.
- :deps {io.github.com-junkawasaki/langgraph-clj
+ :deps {;; jp-go-digital-design-system (DADS) -- the workspace's BASE design
+        ;; system. Used by the build-time operator-console renderer
+        ;; (`parksafety.render-html`) for the vendored dds.css + skin, the
+        ;; same face `docs/index.html` already carries. Git coordinates, not
+        ;; :local/root, so a standalone fork of this repo still resolves it.
+        io.github.kotoba-lang/jp-go-digital-design-system
+        {:git/url "https://github.com/kotoba-lang/jp-go-digital-design-system"
+         :git/sha "83db99546eabc53613ae826ea41d1533a3c574af"}
+        io.github.com-junkawasaki/langgraph-clj
         {:local/root "../../kotoba-lang/langgraph"}
         ;; langchain-store: the shared langchain.db store seam (EDN-blob
         ;; codec + identity schema + event-log read/append helpers) that
@@ -21,6 +29,11 @@
          {:local/root "../../kotoba-lang/langchain"}}}
   ;; clojure -M:dev:run  -> drive the demo through one OperationActor
   :run {:main-opts ["-m" "parksafety.sim"]}
+  ;; clojure -M:dev:render-html [out-file] -> regenerate
+  ;; docs/samples/operator-console.html by driving the REAL actor
+  ;; (flagship checklist item 2, com-junkawasaki/root ADR-2607189300).
+  ;; Throws if the scenario produces 0 HARD governor holds.
+  :render-html {:main-opts ["-m" "parksafety.render-html"]}
   :test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner
                       {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
