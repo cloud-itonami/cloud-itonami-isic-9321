@@ -28,7 +28,7 @@
   would keep, not the act of reopening the ride itself (that is
   `parksafety.operation`'s `:ride/reopen`, always human-gated -- see
   README `Actuation`)."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (defn- unsigned-certificate
   "Every certificate this actor produces is UNSIGNED -- signature is the
@@ -71,7 +71,7 @@
     (throw (ex-info "ride-reopening: jurisdiction required" {})))
   (when (< sequence 0)
     (throw (ex-info "ride-reopening: sequence must be >= 0" {})))
-  (let [reopening-number (str (str/upper-case jurisdiction) "-RDE-" (zero-pad sequence 6))
+  (let [reopening-number (str (str/upper jurisdiction) "-RDE-" (zero-pad sequence 6))
         record {"record_id" reopening-number
                 "kind" "ride-reopening-draft"
                 "ride_id" ride-id
