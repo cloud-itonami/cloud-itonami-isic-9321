@@ -146,7 +146,7 @@ statement.
   to a genuinely different domain (leisure attractions, ISIC division
   93) for the first time.
 - (+) The actuation invariant (governor + phase, two layers) is
-  regression-tested by `test/parksafety/phase_test.clj`'s `ride-
+  regression-tested by `test/parksafety/phase_test.kotoba`'s `ride-
   reopen-never-auto-at-any-phase`.
 - (+) `MemStore` ‖ `DatomicStore` parity is proven by `test/
   parksafety/store_contract_test.clj`, the same `:db-api`-driven swap
