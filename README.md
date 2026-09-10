@@ -75,7 +75,7 @@ autonomous, at any phase, by construction.** Two independent layers
 enforce this (`parksafety.governor`'s `:actuation/reopen-ride` high-
 stakes gate and `parksafety.phase`'s phase table, which never puts
 `:ride/reopen` in any phase's `:auto` set) -- see `parksafety.phase`'s
-docstring and `test/parksafety/phase_test.clj`'s `ride-reopen-never-
+docstring and `test/parksafety/phase_test.kotoba`'s `ride-reopen-never-
 auto-at-any-phase`. The actor may draft, check and recommend; a human
 licensed ride operator/inspector is always the one who actually
 reopens a ride. Like `6511`/`6621`/`6629`/`6612`/`6492`/`7120`/`8620`/
@@ -155,14 +155,14 @@ domain capability lib to reference at all.
 
 | File | Role |
 |---|---|
-| `src/parksafety/store.cljc` | **Store** protocol -- `MemStore` ‖ `DatomicStore` (`langchain.db`) + append-only audit ledger + ride-reopening history. No dynamically-filed sub-record -- the actuation op acts directly on a pre-seeded ride, and the double-reopening guard checks a dedicated `:reopened?` boolean rather than a `:status` value |
-| `src/parksafety/registry.cljc` | Ride-reopening draft records, plus `operators-sufficient?` -- reuses this fleet's MINIMUM-threshold pure-ground-truth-recompute shape, but the FIRST instance to compare two fields on the SAME entity rather than one field against a shared constant |
-| `src/parksafety/facts.cljc` | Per-jurisdiction ride-safety catalog with an official spec-basis citation per entry, honest coverage reporting |
-| `src/parksafety/parkopsllm.cljc` | **ParkOps-LLM Advisor** -- `mock-advisor` ‖ `llm-advisor`; intake/assessment/inspection-screening/ride-reopening proposals |
-| `src/parksafety/governor.cljc` | **Ride Safety Governor** -- 4 HARD checks (spec-basis · evidence-incomplete · inspection-not-passed, unconditional evaluation · operators-insufficient, pure ground-truth two-field recompute) + already-reopened guard + 1 soft (confidence/actuation gate) |
-| `src/parksafety/phase.cljc` | **Phase 0→3** -- read-only → assisted intake → assisted assess → supervised (reopening always human; ride intake is the ONLY auto-eligible op, no direct capital risk) |
-| `src/parksafety/operation.cljc` | **OperationActor** -- langgraph-clj StateGraph |
-| `src/parksafety/sim.cljc` | demo driver |
+| `src/parksafety/store.kotoba` | **Store** protocol -- `MemStore` ‖ `DatomicStore` (`langchain.db`) + append-only audit ledger + ride-reopening history. No dynamically-filed sub-record -- the actuation op acts directly on a pre-seeded ride, and the double-reopening guard checks a dedicated `:reopened?` boolean rather than a `:status` value |
+| `src/parksafety/registry.kotoba` | Ride-reopening draft records, plus `operators-sufficient?` -- reuses this fleet's MINIMUM-threshold pure-ground-truth-recompute shape, but the FIRST instance to compare two fields on the SAME entity rather than one field against a shared constant |
+| `src/parksafety/facts.kotoba` | Per-jurisdiction ride-safety catalog with an official spec-basis citation per entry, honest coverage reporting |
+| `src/parksafety/parkopsllm.kotoba` | **ParkOps-LLM Advisor** -- `mock-advisor` ‖ `llm-advisor`; intake/assessment/inspection-screening/ride-reopening proposals |
+| `src/parksafety/governor.kotoba` | **Ride Safety Governor** -- 4 HARD checks (spec-basis · evidence-incomplete · inspection-not-passed, unconditional evaluation · operators-insufficient, pure ground-truth two-field recompute) + already-reopened guard + 1 soft (confidence/actuation gate) |
+| `src/parksafety/phase.kotoba` | **Phase 0→3** -- read-only → assisted intake → assisted assess → supervised (reopening always human; ride intake is the ONLY auto-eligible op, no direct capital risk) |
+| `src/parksafety/operation.kotoba` | **OperationActor** -- langgraph-clj StateGraph |
+| `src/parksafety/sim.kotoba` | demo driver |
 | `test/parksafety/*_test.clj` | governor contract · phase invariants · store parity · registry conformance · facts coverage |
 
 ## Business-process coverage (honest)
