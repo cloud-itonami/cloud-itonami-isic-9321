@@ -1,5 +1,5 @@
 (ns parksafety.sim
-  "Demo driver -- `clojure -M:dev:run`. Walks a clean ride through
+  "Demo driver -- `kbb -M:dev:run`. Walks a clean ride through
   intake -> jurisdiction assessment -> post-hold inspection screening
   -> ride-reopening proposal (always escalates) -> human approval ->
   commit, then shows four HARD holds (a jurisdiction with no spec-
